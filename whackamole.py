@@ -1,4 +1,6 @@
 import random
+from typing import List
+
 import pygame
 
 
@@ -20,21 +22,25 @@ def grid_to_screen_point(grid_point: (int, int)) -> (int, int):
 
 
 class Mole:
-    __image: pygame.image
+    __images: List[pygame.image]
+    __image_index = 0
     __pos: (int, int)
 
-    def __init__(self, pos: (int, int)):
-        self.__image = pygame.image.load("mole.png")
+    def __init__(self, images: List[pygame.image], pos: (int, int)):
+        self.__images = images
         self.__pos = pos
 
     def draw_onto(self, screen: pygame.Surface) -> None:
-        screen.blit(self.__image, self.__image.get_rect(topleft=grid_to_screen_point(self.__pos)))
+        image = self.__images[self.__image_index]
+        topleft = grid_to_screen_point(self.__pos)
+        screen.blit(image, image.get_rect(topleft=topleft))
 
     def get_pos(self) -> (int, int):
         return self.__pos
 
     def set_pos(self, pos: (int, int)):
         self.__pos = pos
+        self.__image_index = (self.__image_index + 1) % len(self.__images)
 
 
 def draw_grid(screen: pygame.Surface) -> None:
@@ -56,6 +62,13 @@ def get_next_mole_grid_position(current: (int, int)) -> (int, int):
     return pos
 
 
+def load_images() -> List[pygame.image]:
+    return [
+        pygame.image.load("mole_01.png"),
+        pygame.image.load("mole_02.png")
+    ]
+
+
 def main():
     try:
         pygame.init()
@@ -63,7 +76,7 @@ def main():
         clock = pygame.time.Clock()
         running = True
 
-        mole = Mole((0, 0))
+        mole = Mole(load_images(), (0, 0))
 
         while running:
             for event in pygame.event.get():
